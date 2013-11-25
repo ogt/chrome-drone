@@ -15,3 +15,5 @@ repeat for ever
 The chrome extension can be locally tested: a configurable filename is expected to contain a list of URLs, then the 
 extension will loop through these URLs just as if they were returned sequentially from the web service above.
 The HTMLs should be stored in a /tmp/chrome-drone folder, use the slugify-url npm module to map urls to filenames.
+
+The webservice's url is configurable. You can go ahead and suggest a simple "protocol" for the entry points of the web-service.
