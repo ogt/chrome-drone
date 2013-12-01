@@ -10,7 +10,7 @@ command line facility that uses google to execute searches and fetch the results
 
 Parameters
 --
-
+```
  -f filename
      a text file in UTF-8 encoding with searches
      every line is something that can be entered in a google omnibus )
@@ -24,25 +24,25 @@ Parameters
 
  -r randomize Throw a prob : [0..1] dice and wait prob * max_delay_in_secs. (default 1)
  (optional overriding of http headers)
- -accept
- -accept-enconding
- -accept-language
- -user-agent
-
+ -accept string
+ -accept-enconding string
+ -accept-language string
+ -user-agent string
+```
 
 Description
 --
 
 The command does the following
-
- - creates a file $(prefix)map.csv"  that includes two columns (query, file)
- - goes to google.com page, obtain the necessary cookies
- - repeat for each query  string in the file
-    fetch search result page  https://www.google.com/#q=rayban+glasses
+```
+ - creates a file `$(prefix)map.csv`  that includes two columns (query, file)
+ - goes to `http://google.com` page, obtains the necessary cookies
+ - repeat for each query  string in the input file
+    go to  https://www.google.com/#q=rayban+glasses  (where "rayban glasses" is the query string
     saves the HTML file as "$prefix$filename_safe_encoded_query_string".html
     adds/flushes the corresponding line to the map.csv file.
     wait prob*max_delay_in_secs
-
+```
 The program emulates the headers provided by an uptodate google-chrome (use the headers below)
 (unless overridden by the command line parameters)
 The program also keeps track and sends back all the cookies set by google during the session.
@@ -69,5 +69,3 @@ user-agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KH
 ```
 [cookies sent/received in initial request](https://www.evernote.com/shard/s128/sh/ef89dead-3ff5-4b58-9a60-02d7745c3b1c/2346e3ab9e3672d6198c5fe2368c2fe3/deep/0/Google.png)
 
-
-cookies sent/received in subsequent requests
