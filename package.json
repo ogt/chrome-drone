@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "needle": "0.6.3",
-    "phantomjs": "1.9.2-4"
+    "phantomjs": "1.9.2-4",
+    "freeport": "~1.0.2"
   },
   "engines": {
     "node": "*"

@@ -1,5 +1,5 @@
 var args = require('system').args;
-
+var querystring = require('./querystring');
 var page = require('webpage').create();
 
 page.settings.userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) " +
@@ -32,8 +32,6 @@ phantom.onError = function(msg, trace) {
   phantom.exit(1);
 };
 
-
-
 function getPageContent (page) {
   page.evaluate(function () {
     $('script').remove();
@@ -46,6 +44,7 @@ function getPageContent (page) {
   content = content.replace(/url\("\/([^\/])/g, "url(\"https://www.google.com/$1");
   content = content.replace(/url\(\/\//g, "url(http://");
 
+  //require('fs').write('../7.html', content, 'w');
   return content;
 }
 
@@ -65,6 +64,23 @@ if (!url.match(/^https?\/\//)) {
 }
 /* */
 
+var server = require('webserver').create();
+var service = server.listen(phantom.args[0], function(request, response) {
+  if (request.url == '/favicon.ico') { response.close(); return; }
+
+  try {
+    var params = querystring.parse(request.url.replace(/^[^\?]+\?/, ''));
+    log(params);
+    log(request);
+    response.statusCode = 200;
+    response.write('<html><body>Hello!</body></html>');
+    response.close();
+  } catch (e) {
+    log(e);
+  }
+});
+
+/*
 var url = phantom.args[0];
 url = url.replace(/^('|")?(.+?)('|")?$/, "$2");
 
@@ -76,3 +92,4 @@ page.open(url, function(status) {
   log(getPageContent(page));
   phantom.exit();
 });
+*/
