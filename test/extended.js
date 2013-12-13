@@ -7,6 +7,7 @@ var parser = require("../index");
 describe('parser.fetcher', function() {
   this.timeout(15000);
 
+/*
   it('should fetch extended', function(done) {
     var url = 'https://www.google.com/search?q=intercontinental+hotel&' +
       'oq=intercontinental+hotel&aqs=chrome..69i57.226j0j1&sourceid=chrome&ie=UTF-8';
@@ -22,4 +23,14 @@ describe('parser.fetcher', function() {
       done();
     });
   });
+*/
+
+  it('should open and close sessions (child process)', function(done) {
+    var session = new parser.session({}, function() {
+      console.log(session.phantomProcess.killed);
+      session.close();
+      done();
+    });
+  });
+
 });

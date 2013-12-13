@@ -15,3 +15,5 @@ exports.getExtended = function () {
 exports.getExtendedWords = function () {
   return fetcher.getExtendedWords.apply(fetcher, arguments);
 };
+
+exports.session = fetcher.session;
