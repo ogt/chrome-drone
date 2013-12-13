@@ -4,8 +4,10 @@
 var assert = require("assert");
 var parser = require("../index");
 
+var running = require('is-running')
+
 describe('parser.fetcher', function() {
-  this.timeout(15000);
+  this.timeout(50000);
 
 /*
   it('should fetch extended', function(done) {
@@ -28,8 +30,19 @@ describe('parser.fetcher', function() {
   it('should open and close sessions (child process)', function(done) {
     var session = new parser.session({}, function() {
       console.log(session.phantomProcess.killed);
-      session.close();
-      done();
+      session.close(function() {
+        console.log('is running?', running(session.phantomProcess.pid));
+        done();
+      });
+    });
+  });
+
+  it('should get html content', function(done) {
+    var session = new parser.session({}, function() {
+      this.fetchUrl('http://google.com', function(data) {
+        console.log(data);
+        this.close(done);
+      }.bind(this));
     });
   });
 

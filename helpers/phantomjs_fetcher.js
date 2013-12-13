@@ -1,5 +1,11 @@
 var args = require('system').args;
 var querystring = require('./querystring');
+var fs = require('fs')
+
+log_line = function (data) {
+  var logfile = '/Users/pavel/Sites/google-search-fetcher/phantomjs.log';
+  fs.write(logfile, JSON.stringify(data, null, 2) + "\n", 'a');
+};
 
 function log(obj) {
   console.log(JSON.stringify(obj, null, 2));
@@ -44,13 +50,13 @@ preparePage = function(attribute){
     if (response.stage != 'end') return;
 
     //console.log(page.requestingUrl);
-    console.log(response.url, ' ', response.status);
+    //console.log(response.url, ' ', response.status);
     if (response.url === page.requestingUrl) {
       if (response.status == 301 || response.status == 302) {
         response.headers.forEach(function(el, k) {
           if (el.name == 'Location') page.requestingUrl = el.value;
         });
-        console.log('Redirected to ', page.requestingUrl);
+        //console.log('Redirected to ', page.requestingUrl);
       }
 
       if (response.status >= 200) {
@@ -91,12 +97,17 @@ if (!url.match(/^https?\/\//)) {
 }
 /* */
 
+log_line('loaded');
+
 var server = require('webserver').create();
 var service = server.listen(phantom.args[0], function(request, response) {
+  log_line('got request');
+  log_line(request);
+
   if (request.url == '/favicon.ico') { response.close(); return; }
 
   try {
-    var path = request.url.replace(/(\?.*)?$/, '');
+    var path = request.url.replace(/(\?.*)?$/, '').replace(/^\//, '');
     var params = querystring.parse(request.url.replace(/^[^\?]+\?/, ''));
 
     if (path == 'getUrl') {
@@ -109,23 +120,36 @@ var service = server.listen(phantom.args[0], function(request, response) {
 
         var content = getPageContent(page);
 
-        response.statusCode = 200;
         var data = {
+          status: 'ok',
+          pageUrl: page.requestingUrl,
           header: page.catchedHeaders,
           content: content,
           sessionCookies: phantom.cookies
         };
         response.setHeader('Content-Type', 'application/json');
         response.write(JSON.stringify(data, null, 2));
+        response.statusCode = 200;
         response.close();
 
         page.close();
       });
+    } else {
+      response.statusCode = 404;
+      response.close();
     }
   } catch (e) {
+    log_line(e);
     log(e);
+
+    response.setHeader('Content-Type', 'application/json');
+    response.write(JSON.stringify({status: 'error'}, null, 2));
+    response.statusCode = 500;
+    response.close();
   }
 });
+
+log_line('server started');
 
 /*
 var url = phantom.args[0];
