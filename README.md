@@ -5,7 +5,10 @@ Example Usage:
 ```
 var fetcher = require('google-search-fetcher');
 var session = new fetcher.session(headers = null); // allow modifcation of all HTTP headers
-session.searchWords(query, function(err,html) {} );
+session.searchWords(query, function(err,result) {
+    console.log(result.headers);
+    console.log(result.html);
+});
 session.close();
 ```
 
