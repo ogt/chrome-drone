@@ -22,11 +22,11 @@ for (var i=0;i<100;i++) {
 }
 
 function search(cb) {
-  fetcher.searchWords(keywords.pop(), function (err, html) {
+  fetcher.searchWords(keywords.pop(), function (err, result) {
     if (err) 
       cb(err);
     else
-      parser.extended.parseString(html, cb);
+      parser.extended.parseString(result.html, cb);
   });
 }
 
