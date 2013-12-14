@@ -5,7 +5,7 @@ Example Usage:
 ```
 var fetcher = require('google-search-fetcher');
 var session = new fetcher.session(headers = null); // allow modifcation of all HTTP headers
-session.searchWords(query, function(headers,body) {} );
+session.searchWords(query, function(err,html) {} );
 session.close();
 ```
 
@@ -17,35 +17,36 @@ var results = []; // will contain the list of json files
 var Hour = 3600;
 var AvgHumanSearchesPerDay = 20;
 
-for (var i=;i<100;i++) {
-  launch_human()
+for (var i=0;i<100;i++) {
+  launch_human();
 }
 
-function search() {
-  session.searchWords(keywords.pop(), function (headers, body) {
-    parser.extended.parseString(headers+body, function (json_result){
-      results.append(json_result);
-    });
-  }
+function search(cb) {
+  fetcher.searchWords(keywords.pop(), function (err, html) {
+    if (err) 
+      cb(err);
+    else
+      parser.extended.parseString(html, cb);
+  });
 }
 
 function generate_daily_search_timestamps() {
-  var series = ;
+  var series = [];
   for (var i=0; i< Math.random() * 2*AvgHumanSearchesPerDay; i++ ) {
-    series.append(Math.random(24*Hour))
+    series.append(Math.random(24*Hour));
   }
-  return series.sort()
+  return series.sort();
 }
 
 function launch_human() {
-  var fetcher = require('google-search-fetcher');
-  var session = new fetcher.session(headers = null)  // if null use some default http-headers
+  var fetcher = new fetcher.session(headers = null);  // if null use some default http-headers
                                 // ideally it should randomize the headers too
   var parser = require('google-search-ads-parser');
   var series = generate_daily_search_timestamps();
-  for (var i=0; i< series.length;i++) {
+  for (var i=0; i<series.length;i++) {
     setTimeout(search, series[i]);
   }
-  setTimeout(function() { session.close(); }, series[series.length-1]+1);
+  setTimeout(function() { fetcher.close(); }, series[series.length-1]+1);
 }
+
 ```
