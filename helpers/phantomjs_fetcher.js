@@ -50,7 +50,6 @@ preparePage = function(attribute){
     if (response.stage != 'end') return;
 
     //console.log(page.requestingUrl);
-    //console.log(response.url, ' ', response.status);
     if (response.url === page.requestingUrl) {
       if (response.status == 301 || response.status == 302) {
         response.headers.forEach(function(el, k) {
@@ -62,6 +61,12 @@ preparePage = function(attribute){
       if (response.status >= 200) {
         page.catchedHeaders = JSON.parse(JSON.stringify(response.headers));
       }
+    }
+
+    var host = page.requestingUrl.match(/^(https?:\/\/[^\/]+)/)[1];
+    if (response.url.indexOf(host) == 0) {
+      page.supposedlyCatchedUrl = response.url;
+      page.supposedlyCatchedHeaders = JSON.parse(JSON.stringify(response.headers));
     }
   };
 
@@ -123,7 +128,7 @@ var service = server.listen(phantom.args[0], function(request, response) {
         var data = {
           status: 'ok',
           pageUrl: page.requestingUrl,
-          header: page.catchedHeaders,
+          headers: page.catchedHeaders || page.supposedlyCatchedHeaders,
           content: content,
           sessionCookies: phantom.cookies
         };
