@@ -11,13 +11,16 @@
   },
   "dependencies": {
     "needle": "0.6.3",
-    "phantomjs": "1.9.2-4"
+    "phantomjs": "1.9.2-4",
+    "freeport": "~1.0.2"
   },
   "engines": {
     "node": "*"
   },
   "devDependencies": {
     "mocha": "1.14.0",
-    "jshint": "~2.1.4"
+    "jshint": "~2.1.4",
+    "is-running": ">=1.0.3",
+    "open": ">= 0.0.3"
   }
 }
