@@ -20,7 +20,7 @@ var session = new fetcher.session({}, function() {
 
     console.log('searching for: ', kv);
 
-    session.fetchUrl('https://www.google.com/search?q=' + kv.replace(/\s/g, '+'), function(headers, html, extraData) {
+    session.fetchWords(kv, function(headers, html, extraData) {
       
       results[kv] = [headers, html, extraData];
 

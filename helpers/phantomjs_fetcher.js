@@ -46,6 +46,11 @@ preparePage = function(attribute){
     log(trace);
   };
 
+  page.onUrlChanged = function (newUrl) {
+    console.log('page.onUrlChanged', newUrl);
+    page.requestingUrl = newUrl;
+  };
+
   page.onResourceReceived = function(response) {
     if (response.stage != 'end') return;
 
@@ -86,23 +91,26 @@ getPageContent = function (page) {
   content = content.replace(/url\("\/([^\/])/g, "url(\"https://www.google.com/$1");
   content = content.replace(/url\(\/\//g, "url(http://");
 
-  //require('fs').write('../7.html', content, 'w');
   return content;
 }
 
+sendPageContent = function (page, response) {
+  var content = getPageContent(page);
 
-/* *\/
-if (!url.match(/^https?\/\//)) {
-  var relativeScriptPath = require('system').args[0];
-  var fs = require('fs');
-  var absoluteScriptPath = fs.absolute(relativeScriptPath);
-  var absoluteScriptDir = absoluteScriptPath.substring(0, absoluteScriptPath.lastIndexOf('/'));
-
-  url = 'file:///' + absoluteScriptDir + '/../' + url;
+  var data = {
+    status: 'ok',
+    pageUrl: page.requestingUrl,
+    headers: page.catchedHeaders || page.supposedlyCatchedHeaders,
+    content: content,
+    sessionCookies: phantom.cookies
+  };
+  response.setHeader('Content-Type', 'application/json');
+  response.write(JSON.stringify(data, null, 2));
+  response.statusCode = 200;
+  response.close();
 }
-/* */
 
-log_line('loaded');
+//log_line('loaded');
 
 var server = require('webserver').create();
 var service = server.listen(phantom.args[0], function(request, response) {
@@ -123,22 +131,49 @@ var service = server.listen(phantom.args[0], function(request, response) {
       page.open(params.url, function(status) {
         page.injectJs('./helpers/zepto.js');
 
-        var content = getPageContent(page);
-
-        var data = {
-          status: 'ok',
-          pageUrl: page.requestingUrl,
-          headers: page.catchedHeaders || page.supposedlyCatchedHeaders,
-          content: content,
-          sessionCookies: phantom.cookies
-        };
-        response.setHeader('Content-Type', 'application/json');
-        response.write(JSON.stringify(data, null, 2));
-        response.statusCode = 200;
-        response.close();
-
+        sendPageContent(page, response);
         page.close();
       });
+
+    } else if (path == 'getByWords') {
+      var words = params.q;
+
+      var page = preparePage();
+      page.requestingUrl = 'https://www.google.com/';
+
+      var typeAndSubmit = function() {
+        page.evaluate(function(words) {
+          Zepto('input[name=q]').val(words);
+          Zepto('input[name=q]').closest('form').submit();
+        }, words);
+      };
+
+      page.onCallback = function(data) {
+        page.injectJs('./helpers/zepto.js');
+
+        // first time - fill form
+        if (page.url == 'https://www.google.com/') {
+          typeAndSubmit();
+        } else {
+          // second time - respond to API request
+          //page.render('googleScreenShot' + '.png');
+          sendPageContent(page, response);
+          page.close();
+        }
+      };
+
+      page.onInitialized = function() {
+        page.evaluate(function(domContentLoadedMsg) {
+          document.addEventListener('DOMContentLoaded', function() {
+            window.callPhantom('DOMContentLoaded');
+          }, false);
+        });
+      };
+
+      page.open(page.requestingUrl, function(status) {
+        //page.injectJs('./helpers/zepto.js');
+      });
+
     } else {
       response.statusCode = 404;
       response.close();
@@ -154,18 +189,4 @@ var service = server.listen(phantom.args[0], function(request, response) {
   }
 });
 
-log_line('server started');
-
-/*
-var url = phantom.args[0];
-url = url.replace(/^('|")?(.+?)('|")?$/, "$2");
-
-page.open(url, function(status) {
-  page.injectJs('./helpers/zepto.js');
-
-  page.render("test.png", { format: "png" });
-
-  log(getPageContent(page));
-  phantom.exit();
-});
-*/
+//log_line('server started');

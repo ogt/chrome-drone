@@ -5,7 +5,7 @@ var open = require('open')
 var log = function (a) { console.log(JSON.stringify(a, null, 2)); }
 
 var session = new fetcher.session({}, function() {
-  this.fetchUrl('https://www.google.com/search?q=veritrans', function(headers, html, extraData) {
+  this.fetchWords('veritrans indonesia', function(headers, html, extraData) {
     log(headers);
     log(extraData);
 
